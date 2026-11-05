@@ -128,6 +128,16 @@ def test_delete_removes_post_when_logged_in(client):
     rv = client.get("/delete/1")
     assert json.loads(rv.data)["status"] == 1
     assert db.session.get(Post, 1) is None
+
+def test_delete_message(client):
+    """Ensure the messages are being deleted"""
+    rv = client.get("/delete/1")
+    data = json.loads(rv.data)
+    assert data["status"] == 0
+    login(client, app.config["USERNAME"], app.config["PASSWORD"])
+    rv = client.get("/delete/1")
+    data = json.loads(rv.data)
+    assert data["status"] == 1
 # from project.app import app, init_db
 # from pathlib import Path
 
