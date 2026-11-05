@@ -4,6 +4,7 @@ from pathlib import Path
 
 from project.app import app, db
 import json
+from project.models import Post
 
 TEST_DB = "test.db"
 
@@ -82,6 +83,51 @@ def test_delete_message(client):
     data = json.loads(rv.data)
     assert data["status"] == 1
 
+def add_post(client, title, text):
+    """Helper: log in and add one post."""
+    login(client, app.config["USERNAME"], app.config["PASSWORD"])
+    client.post("/add", data=dict(title=title, text=text), follow_redirects=True)
+    logout(client)
+
+
+def test_search_page_loads(client):
+    """Search page with no query renders and shows no posts."""
+    rv = client.get("/search/")
+    assert rv.status_code == 200
+    assert b'class="entry"' not in rv.data
+
+
+def test_search_matches_title(client):
+    add_post(client, "Flask tips", "blueprints are useful")
+    add_post(client, "Cooking", "pasta needs salt")
+    rv = client.get("/search/?query=flask")
+    assert b"Flask tips" in rv.data
+    assert b"Cooking" not in rv.data
+
+
+def test_search_matches_text(client):
+    add_post(client, "Cooking", "pasta needs salt")
+    rv = client.get("/search/?query=salt")
+    assert b"Cooking" in rv.data
+
+
+
+
+def test_delete_requires_login(client):
+    """Logged-out delete returns 401 and the post is NOT removed."""
+    add_post(client, "keep me", "should survive")
+    rv = client.get("/delete/1")
+    assert rv.status_code == 401
+    assert db.session.get(Post, 1) is not None
+
+
+def test_delete_removes_post_when_logged_in(client):
+    """Logged-in delete actually removes the row from the database."""
+    add_post(client, "temporary", "delete me")
+    login(client, app.config["USERNAME"], app.config["PASSWORD"])
+    rv = client.get("/delete/1")
+    assert json.loads(rv.data)["status"] == 1
+    assert db.session.get(Post, 1) is None
 # from project.app import app, init_db
 # from pathlib import Path
 
