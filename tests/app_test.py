@@ -1,4 +1,3 @@
-import os
 import pytest
 from pathlib import Path
 
@@ -77,11 +76,13 @@ def test_messages(client):
     assert b"&lt;Hello&gt;" in rv.data
     assert b"<strong>HTML</strong> allowed here" in rv.data
 
-def test_delete_message(client):
-    """Ensure the messages are being deleted"""
-    rv = client.get('/delete/1')
-    data = json.loads(rv.data)
-    assert data["status"] == 1
+
+# def test_delete_message(client):
+#     """Ensure the messages are being deleted"""
+#     rv = client.get("/delete/1")
+#     data = json.loads(rv.data)
+#     assert data["status"] == 1
+
 
 def add_post(client, title, text):
     """Helper: log in and add one post."""
@@ -111,8 +112,6 @@ def test_search_matches_text(client):
     assert b"Cooking" in rv.data
 
 
-
-
 def test_delete_requires_login(client):
     """Logged-out delete returns 401 and the post is NOT removed."""
     add_post(client, "keep me", "should survive")
@@ -129,6 +128,7 @@ def test_delete_removes_post_when_logged_in(client):
     assert json.loads(rv.data)["status"] == 1
     assert db.session.get(Post, 1) is None
 
+
 def test_delete_message(client):
     """Ensure the messages are being deleted"""
     rv = client.get("/delete/1")
@@ -138,6 +138,8 @@ def test_delete_message(client):
     rv = client.get("/delete/1")
     data = json.loads(rv.data)
     assert data["status"] == 1
+
+
 # from project.app import app, init_db
 # from pathlib import Path
 
