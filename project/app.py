@@ -1,6 +1,6 @@
 import sqlite3
 
-from flask import Flask, g, render_template, request, session, flash, redirect, url_for, abort
+from flask import Flask, g, render_template, request, session, flash, redirect, url_for, abort, jsonify
 # configuration
 DATABASE = "flaskr.db"
 USERNAME = "admin"
@@ -33,7 +33,18 @@ def get_db():
     if not hasattr(g, "sqlite_db"):
         g.sqlite_db = connect_db()
     return g.sqlite_db
-
+@app.route('/delete/<post_id>', methods=['GET'])
+def delete_entry(post_id):
+    """Delete post from database"""
+    result = {'status': 0, 'message': 'Error'}
+    try:
+        db = get_db()
+        db.execute('delete from entries where id=' + post_id)
+        db.commit()
+        result = {'status': 1, 'message': "Post Deleted"}
+    except Exception as e:
+        result = {'status': 0, 'message': repr(e)}
+    return jsonify(result)
 
 # close database connection
 @app.teardown_appcontext

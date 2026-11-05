@@ -40,9 +40,9 @@
 
       <ul class="entries">
         {% for entry in entries %}
-        <li>
-          <h2>{{ entry.title }}</h2>
-          {{ entry.text|safe }}
+        <li class="entry">
+          <h2 id="{{ entry.id }}">{{ entry.title }}</h2>
+            {{ entry.text|safe }}
         </li>
         {% else %}
         <li><em>No entries yet. Add some!</em></li>
@@ -50,4 +50,8 @@
       </ul>
     </div>
   </body>
+  <script
+  type="text/javascript"
+  src="{{url_for('static', filename='main.js') }}"
+></script>
 </html>
